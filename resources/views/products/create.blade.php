@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Tambah Produk | Nexora Tech</title>
+
+    <style>
+        * { box-sizing: border-box; }
+
+        body {
+            margin: 0;
+            font-family: "Segoe UI", Arial, sans-serif;
+            background: #f1f5f9;
+            color: #1e293b;
+        }
+
+        header {
+            background: #1e3a8a;
+            color: white;
+            padding: 20px 5%;
+        }
+
+        header a {
+            color: white;
+            text-decoration: none;
+        }
+
+        main {
+            max-width: 850px;
+            margin: 32px auto;
+            padding: 0 20px;
+        }
+
+        h1 { margin: 0 0 8px; font-size: 26px; }
+
+        .muted {
+            color: #64748b;
+            margin-bottom: 25px;
+        }
+
+        .panel {
+            padding: 27px;
+            background: white;
+            border: 1px solid #e2e8f0;
+            border-radius: 14px;
+            box-shadow: 0 5px 18px #1e3a8a08;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0 20px;
+        }
+
+        .field { margin-bottom: 17px; }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-size: 13px;
+            font-weight: 700;
+        }
+
+        input, select, textarea {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #cbd5e1;
+            border-radius: 8px;
+            background: white;
+            font: inherit;
+            font-size: 14px;
+        }
+
+        input:focus, select:focus, textarea:focus {
+            outline: 2px solid #bfdbfe;
+            border-color: #2563eb;
+        }
+
+        input[readonly] {
+            background: #f8fafc;
+            color: #64748b;
+        }
+
+        textarea {
+            min-height: 90px;
+            resize: vertical;
+        }
+
+        .hint {
+            color: #64748b;
+            font-size: 12px;
+            margin-top: 6px;
+        }
+
+        .error {
+            color: #b91c1c;
+            font-size: 12px;
+            margin-top: 6px;
+        }
+
+        .alert {
+            background: #fee2e2;
+            color: #991b1b;
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 18px;
+        }
+
+        .actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .btn {
+            padding: 12px 17px;
+            border: 0;
+            border-radius: 8px;
+            cursor: pointer;
+            text-decoration: none;
+            font-size: 13px;
+        }
+
+        .primary { background: #2563eb; color: white; }
+        .secondary { background: #e2e8f0; color: #334155; }
+
+        @media(max-width: 600px) {
+            .grid { grid-template-columns: 1fr; }
+            .panel { padding: 20px; }
+        }
+    </style>
+</head>
+
+<body>
+<header>
+    <a href="{{ route('dashboard') }}">
+        <strong>Nexora Tech</strong>
+    </a>
+</header>
+
+<main>
+    <h1>Tambah Produk</h1>
+    <p class="muted">
+        Lengkapi informasi produk yang akan didaftarkan.
+    </p>
+
+    @if($errors->any())
+        <div class="alert">
+            Periksa kembali formulir.
+            {{ $errors->first() }}
+        </div>
+    @endif
+
+    @if($categories->isEmpty())
+        <div class="alert">
+            Belum ada kategori. Buat kategori terlebih dahulu melalui
+            halaman kategori.
+            <a href="{{ route('categories.create') }}">Tambah kategori</a>
+        </div>
+    @endif
+
+    <section class="panel">
+        <form method="POST" action="{{ route('products.store') }}">
+            @csrf
+
+            <div class="grid">
+                <div class="field">
+                    <label for="sku">SKU / Kode Produk</label>
+                    <input
+                        id="sku"
+                        value="Dibuat otomatis saat disimpan"
+                        readonly
+                        aria-describedby="sku-hint"
+                    >
+                    <div id="sku-hint" class="hint">
+                        Kode akan dibuat otomatis oleh sistem.
+                    </div>
+                </div>
+
+                <div class="field">
+                    <label for="name">Nama Produk *</label>
+                    <input
+                        id="name"
+                        name="name"
+                        value="{{ old('name') }}"
+                        maxlength="255"
+                        required
+                        placeholder="Nama produk"
+                    >
+                    @error('name')
+                        <div class="error">{{ $message }}</div>
+                    @enderror
+                </div>
+
+                <div class="field">
+                    <label for="category_id">Kategori *</label>
+                    <select id="category_id" name="category_id" required>
+                        <option value="">Pilih kategori</option>
+
+                        @foreach($categories as $category)
+                            <option
+                                value="{{ $category->id }}"
+                                @selected(old('category_id') == $category->id)
+                            >
+                                {{ $category->name }}
+                            </option>
+                        @endforeach
+                    </select>
+
+                    @error('category_id')
+                        <div class="error">{{ $message }}</div>
+                    @enderror
+                </div>
+
+                <div class="field">
+                    <label for="purchase_price">Harga Beli (Rp) *</label>
+                    <input
+                        id="purchase_price"
+                        type="number"
+                        name="purchase_price"
+                        value="{{ old('purchase_price', 0) }}"
+                        min="0"
+                        step="0.01"
+                        required
+                    >
+                    @error('purchase_price')
+                        <div class="error">{{ $message }}</div>
+                    @enderror
+                </div>
+
+                <div class="field">
+                    <label for="selling_price">Harga Jual (Rp) *</label>
+                    <input
+                        id="selling_price"
+                        type="number"
+                        name="selling_price"
+                        value="{{ old('selling_price', 0) }}"
+                        min="0"
+                        step="0.01"
+                        required
+                    >
+                    @error('selling_price')
+                        <div class="error">{{ $message }}</div>
+                    @enderror
+                </div>
+
+                <div class="field">
+                    <label for="stock">Stok Awal *</label>
+                    <input
+                        id="stock"
+                        type="number"
+                        name="stock"
+                        value="{{ old('stock', 0) }}"
+                        min="0"
+                        step="1"
+                        required
+                    >
+                    @error('stock')
+                        <div class="error">{{ $message }}</div>
+                    @enderror
+                </div>
+
+                <div class="field">
+                    <label for="minimum_stock">Batas Minimum Stok *</label>
+                    <input
+                        id="minimum_stock"
+                        type="number"
+                        name="minimum_stock"
+                        value="{{ old('minimum_stock', 5) }}"
+                        min="0"
+                        step="1"
+                        required
+                    >
+                    @error('minimum_stock')
+                        <div class="error">{{ $message }}</div>
+                    @enderror
+                </div>
+            </div>
+
+            <div class="field">
+                <label for="description">Deskripsi Produk</label>
+                <textarea
+                    id="description"
+                    name="description"
+                    maxlength="1000"
+                    placeholder="Deskripsi produk (opsional)"
+                >{{ old('description') }}</textarea>
+
+                @error('description')
+                    <div class="error">{{ $message }}</div>
+                @enderror
+            </div>
+
+            <div class="actions">
+                <a href="{{ route('products.index') }}" class="btn secondary">
+                    Batal
+                </a>
+
+                <button
+                    type="submit"
+                    class="btn primary"
+                    @disabled($categories->isEmpty())
+                >
+                    Simpan Produk
+                </button>
+            </div>
+        </form>
+    </section>
+</main>
+</body>
+</html>
